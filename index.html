@@ -11,6 +11,19 @@
       background-color: #e7ecf0;
       text-align: center;
     }
+    .logo-header {
+      background-color: #2ecc71;
+      padding: 1.5rem 0;
+      margin-bottom: 1.5rem;
+    }
+    .logo-header img {
+      width: 90px;
+    }
+    .logo-header h1 {
+      color: white;
+      margin-top: 0.5rem;
+      font-size: 1.4rem;
+    }
     .card {
       background: #ffffff;
       padding: 2.5rem;
@@ -20,12 +33,6 @@
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
       position: relative;
       border: 1px solid #d0d7de;
-    }
-    .card img.logo {
-      width: 70px;
-      position: absolute;
-      top: 1.2rem;
-      left: 1.2rem;
     }
     .card h2 {
       margin-top: 1rem;
@@ -71,7 +78,7 @@
       body * {
         visibility: hidden;
       }
-      .card, .card * {
+      .logo-header, .card, .card * {
         visibility: visible;
       }
       .card {
@@ -85,8 +92,11 @@
   </style>
 </head>
 <body>
+  <div class="logo-header">
+    <img src="logo.png" alt="Λογότυπο">
+    <h1>Κάρτα Μέλους</h1>
+  </div>
   <div class="card" id="card">
-    <img src="logo.png" alt="Λογότυπο" class="logo">
     <h2>Φόρτωση δεδομένων μέλους...</h2>
   </div>
   <div class="print-button">
@@ -127,8 +137,7 @@
           const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://membership-viewer-git-main-spiridon-intzegiannis-projects.vercel.app/?id=${memberId}`;
 
           card.innerHTML = `
-            <img src="logo.png" alt="Λογότυπο" class="logo">
-            <h2>Κάρτα Μέλους</h2>
+            <h2>Στοιχεία Μέλους</h2>
             <p><strong>Αριθμός Μέλους:</strong> ${memberId}</p>
             <p><strong>Όνομα:</strong> ${name}</p>
             <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
