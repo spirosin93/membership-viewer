@@ -18,6 +18,16 @@
       max-width: 400px;
       margin: 0 auto;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .card img.logo {
+      width: 80px;
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+    }
+    .qr {
+      margin-top: 1.5rem;
     }
     .status-active {
       color: green;
@@ -41,11 +51,15 @@
         margin: 0;
         box-shadow: none;
       }
+      .print-button {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
   <div class="card" id="card">
+    <img src="logo.png" alt="Λογότυπο" class="logo">
     <h2>Φόρτωση δεδομένων μέλους...</h2>
   </div>
   <div class="print-button">
@@ -83,12 +97,18 @@
           const status = member['Status'] || 'Άγνωστο';
           const isActive = status.toLowerCase() === 'active';
 
+          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://membership-viewer-git-main-spiridon-intzegiannis-projects.vercel.app/?id=${memberId}`;
+
           card.innerHTML = `
-            <h2>Πληροφορίες Μέλους</h2>
+            <img src="logo.png" alt="Λογότυπο" class="logo">
+            <h2>Κάρτα Μέλους</h2>
             <p><strong>Αριθμός Μέλους:</strong> ${memberId}</p>
             <p><strong>Όνομα:</strong> ${name}</p>
             <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
             <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
+            <div class="qr">
+              <img src="${qrUrl}" alt="QR Code">
+            </div>
           `;
         } else {
           card.innerHTML = `<h2>Μέλος δεν βρέθηκε</h2><p>Δεν βρέθηκε μέλος με ID: ${memberId}</p>`;
