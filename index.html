@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Membership Status Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f4f4f4;
+      text-align: center;
+    }
+    .card {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 400px;
+      margin: 0 auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    .status-active {
+      color: green;
+      font-weight: bold;
+    }
+    .status-expired {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <h2>Loading membership data...</h2>
+  </div>
+
+  <script>
+    const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRG3gkH7qb67N6G1K2LCMVuYzeIuW0RSXRDpyy2LKM36q6mEgIvZ3wcyz97j7bf75TSwwYhoq7hhvjM/gviz/tq?tqx=out:json';
+
+    const params = new URLSearchParams(window.location.search);
+    const memberId = params.get('id');
+
+    fetch(sheetURL)
+      .then(res => res.text())
+      .then(text => {
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        const rows = json.table.rows;
+
+        const member = rows.find(row => row.c[0]?.v?.toString() === memberId);
+
+        const card = document.getElementById('card');
+
+        if (member) {
+          const name = member.c[1]?.v || 'Unknown';
+          const expiry = member.c[2]?.v || 'N/A';
+          const status = member.c[3]?.v || 'Unknown';
+
+          const isActive = status.toLowerCase() === 'active';
+
+          card.innerHTML = `
+            <h2>Membership Info</h2>
+            <p><strong>ID:</strong> ${memberId}</p>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Expiry Date:</strong> ${expiry}</p>
+            <p><strong>Status:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${status}</span></p>
+          `;
+        } else {
+          card.innerHTML = `<h2>Member not found</h2><p>No member with ID: ${memberId}</p>`;
+        }
+      })
+      .catch(err => {
+        document.getElementById('card').innerHTML = '<h2>Error loading data</h2>';
+        console.error('Fetch error:', err);
+      });
+  </script>
+</body>
+</html>
