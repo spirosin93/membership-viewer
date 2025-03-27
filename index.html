@@ -47,13 +47,6 @@
     .card p {
       color: #ffffff;
     }
-    .qr {
-      margin-top: 1.8rem;
-    }
-    .qr img {
-      border: 4px solid #ddd;
-      border-radius: 0.5rem;
-    }
     .status-active {
       color: #27ae60;
       font-weight: bold;
@@ -107,16 +100,13 @@
     <input type="text" id="searchInput" placeholder="Αναζήτηση με Όνομα ή ID">
     <button onclick="searchMember()">Αναζήτηση</button>
   </div>
-
   <div class="card" id="card">
     <img src="logo.png" alt="Λογότυπο" class="logo">
     <h2>Πληκτρολογήστε όνομα ή ID για αναζήτηση...</h2>
   </div>
-
   <div class="print-button">
     <button onclick="window.print()">🖨 Εκτύπωση / Αποθήκευση σε PDF</button>
   </div>
-
   <script>
     const sheetURL = 'https://script.google.com/macros/s/AKfycbwXJriHgWntMQwvJIgibzKp-wMuQuO5YSucT_RvTYThuLpGrYRpkqD0U5jc5om0C4U1qw/exec';
     let membersData = [];
@@ -136,90 +126,57 @@
       );
 
       if (results.length === 1) {
-        const member = results[0];
-        const name = member['Name']?.trim() || 'Άγνωστο';
-        const status = member['Status']?.trim() || 'Άγνωστο';
-        const isActive = status.toLowerCase() === 'active';
-
-        let expiryFormatted = 'Δεν είναι διαθέσιμο';
-        if (member['Expiry Date']) {
-          const dateObj = new Date(member['Expiry Date']);
-          if (!isNaN(dateObj)) {
-            const day = String(dateObj.getDate()).padStart(2, '0');
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const year = dateObj.getFullYear();
-            expiryFormatted = `${day}/${month}/${year}`;
-          } else {
-            expiryFormatted = member['Expiry Date'];
-          }
-        }
-
-        card.innerHTML = `
-          <img src="logo.png" alt="Λογότυπο" class="logo">
-          <h2>Στοιχεία Μέλους</h2>
-          <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
-          <p><strong>Όνομα:</strong> ${name}</p>
-          <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
-          <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
-        `;
+        showMemberDetails(results[0]);
       } else if (results.length > 1) {
         card.innerHTML = `<h2>Βρέθηκαν ${results.length} αποτελέσματα</h2>` + results.map((member, index) => `
-  <div style="margin: 1rem 0; padding: 1rem; border: 1px solid white; border-radius: 1rem;">
-    <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
-    <p><strong>Όνομα:</strong> ${member['Name']}</p>
-    <button onclick="showMemberDetails(${index})">Επιλογή</button>
-  </div>
-`).join('');
-      } else {
-            expiryFormatted = member['Expiry Date'];
-          }
-        }
-
-        card.innerHTML = `
-          <img src="logo.png" alt="Λογότυπο" class="logo">
-          <h2>Στοιχεία Μέλους</h2>
-          <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
-          <p><strong>Όνομα:</strong> ${name}</p>
-          <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
-          <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
-        `;
+          <div style="margin: 1rem 0; padding: 1rem; border: 1px solid white; border-radius: 1rem;">
+            <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
+            <p><strong>Όνομα:</strong> ${member['Name']}</p>
+            <button onclick="showMemberDetailsByIndex(${index})">Επιλογή</button>
+          </div>
+        `).join('');
       } else {
         card.innerHTML = `<h2>Μέλος δεν βρέθηκε</h2><p>Δεν βρέθηκε μέλος με τα στοιχεία: ${input}</p>`;
       }
     }
-  function showMemberDetails(index) {
-  const member = membersData.filter(row =>
-    String(row['Member ID']).toLowerCase() === document.getElementById('searchInput').value.toLowerCase().trim() ||
-    String(row['Name']).toLowerCase().includes(document.getElementById('searchInput').value.toLowerCase().trim())
-  )[index];
 
-  const card = document.getElementById('card');
-  const name = member['Name']?.trim() || 'Άγνωστο';
-  const status = member['Status']?.trim() || 'Άγνωστο';
-  const isActive = status.toLowerCase() === 'active';
+    function showMemberDetails(member) {
+      const card = document.getElementById('card');
+      const name = member['Name']?.trim() || 'Άγνωστο';
+      const status = member['Status']?.trim() || 'Άγνωστο';
+      const isActive = status.toLowerCase() === 'active';
 
-  let expiryFormatted = 'Δεν είναι διαθέσιμο';
-  if (member['Expiry Date']) {
-    const dateObj = new Date(member['Expiry Date']);
-    if (!isNaN(dateObj)) {
-      const day = String(dateObj.getDate()).padStart(2, '0');
-      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const year = dateObj.getFullYear();
-      expiryFormatted = `${day}/${month}/${year}`;
-    } else {
-      expiryFormatted = member['Expiry Date'];
+      let expiryFormatted = 'Δεν είναι διαθέσιμο';
+      if (member['Expiry Date']) {
+        const dateObj = new Date(member['Expiry Date']);
+        if (!isNaN(dateObj)) {
+          const day = String(dateObj.getDate()).padStart(2, '0');
+          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const year = dateObj.getFullYear();
+          expiryFormatted = `${day}/${month}/${year}`;
+        } else {
+          expiryFormatted = member['Expiry Date'];
+        }
+      }
+
+      card.innerHTML = `
+        <img src="logo.png" alt="Λογότυπο" class="logo">
+        <h2>Στοιχεία Μέλους</h2>
+        <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
+        <p><strong>Όνομα:</strong> ${name}</p>
+        <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
+        <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
+      `;
     }
-  }
 
-  card.innerHTML = `
-    <img src="logo.png" alt="Λογότυπο" class="logo">
-    <h2>Στοιχεία Μέλους</h2>
-    <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
-    <p><strong>Όνομα:</strong> ${name}</p>
-    <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
-    <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
-  `;
-}
-</script>
+    function showMemberDetailsByIndex(index) {
+      const input = document.getElementById('searchInput').value.toLowerCase().trim();
+      const results = membersData.filter(row =>
+        String(row['Member ID']).toLowerCase() === input ||
+        String(row['Name']).toLowerCase().includes(input)
+      );
+      showMemberDetails(results[index]);
+    }
+  </script>
 </body>
 </html>
