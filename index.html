@@ -82,6 +82,26 @@
     print-color-adjust: exact;
   }
   .print-button {
+    visibility: visible !important;
+    display: block !important;
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+  .card, .card * {
+    visibility: visible;
+  }
+  .card {
+    margin: 0;
+    box-shadow: none;
+    background: #007A3D !important;
+    color: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print-button {
     display: none !important;
   }
 }
