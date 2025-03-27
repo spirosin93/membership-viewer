@@ -100,6 +100,10 @@
     <input type="text" id="searchInput" placeholder="Αναζήτηση με Όνομα ή ID" oninput="searchMember()">
     
   </div>
+  <div style="margin-bottom: 1.5rem;">
+    <button onclick="startQRScanner()" style="padding: 0.6rem 1.2rem; font-size: 1rem; border: none; border-radius: 0.5rem; background-color: #007A3D; color: white; cursor: pointer;">📷 Σάρωση QR</button>
+    <video id="qr-video" style="width: 300px; margin-top: 1rem; display: none;"></video>
+  </div>
   <div class="card" id="card">
     <img src="logo.png" alt="Λογότυπο" class="logo">
     <h2>Πληκτρολογήστε όνομα ή ID για αναζήτηση...</h2>
@@ -204,6 +208,37 @@
       );
       showMemberDetails(results[index]);
     }
-  </script>
+  function startQRScanner() {
+  const video = document.getElementById('qr-video');
+  video.style.display = 'block';
+
+  if (!window.html5QrCode) {
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/html5-qrcode';
+    script.onload = () => initQR();
+    document.body.appendChild(script);
+  } else {
+    initQR();
+  }
+
+  function initQR() {
+    const qrScanner = new Html5Qrcode("qr-video");
+    qrScanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      (decodedText) => {
+        qrScanner.stop();
+        video.style.display = 'none';
+        const id = new URL(decodedText).searchParams.get('id');
+        const member = membersData.find(row => String(row['Member ID']) === id);
+        if (member) showMemberDetails(member);
+      },
+      (errorMessage) => {}
+    ).catch(err => {
+      console.error("QR scanner error", err);
+    });
+  }
+}
+</script>
 </body>
 </html>
