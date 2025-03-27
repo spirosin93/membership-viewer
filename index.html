@@ -198,6 +198,13 @@
           if (devices && devices.length) {
             const cameraSelect = document.getElementById('camera-select');
             cameraSelect.innerHTML = devices.map(device => `<option value="${device.id}">${device.label}</option>`).join('');
+            cameraSelect.onchange = () => {
+              if (qrScanner) {
+                qrScanner.stop().then(() => {
+                  startQRScanner();
+                });
+              }
+            };
             const selectedCameraId = cameraSelect.value || devices[0].id;
             qrScanner = new Html5Qrcode("qr-reader");
             qrScanner.start(
