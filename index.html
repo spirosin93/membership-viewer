@@ -108,6 +108,21 @@
     <button onclick="window.print()">🖨 Εκτύπωση / Αποθήκευση σε PDF</button>
   </div>
   <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const memberId = params.get('id');
+
+      if (memberId) {
+        const interval = setInterval(() => {
+          if (membersData.length > 0) {
+            const member = membersData.find(row => String(row['Member ID']) === String(memberId));
+            if (member) showMemberDetails(member);
+            clearInterval(interval);
+          }
+        }, 100);
+      }
+    });
+
     const sheetURL = 'https://script.google.com/macros/s/AKfycbwXJriHgWntMQwvJIgibzKp-wMuQuO5YSucT_RvTYThuLpGrYRpkqD0U5jc5om0C4U1qw/exec';
     let membersData = [];
 
