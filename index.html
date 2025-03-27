@@ -11,6 +11,26 @@
       background-color: #ffffff;
       text-align: center;
     }
+    .search-container {
+      margin-bottom: 2rem;
+    }
+    .search-container input {
+      padding: 0.6rem;
+      font-size: 1rem;
+      width: 260px;
+      border-radius: 0.5rem;
+      border: 1px solid #ccc;
+    }
+    .search-container button {
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      margin-left: 0.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      background-color: #007A3D;
+      color: white;
+      cursor: pointer;
+    }
     .card {
       max-width: 420px;
       margin: 3rem auto;
@@ -83,64 +103,68 @@
   </style>
 </head>
 <body>
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Αναζήτηση με Όνομα ή ID">
+    <button onclick="searchMember()">Αναζήτηση</button>
+  </div>
+
   <div class="card" id="card">
     <img src="logo.png" alt="Λογότυπο" class="logo">
-    <h2>Φόρτωση δεδομένων μέλους...</h2>
+    <h2>Πληκτρολογήστε όνομα ή ID για αναζήτηση...</h2>
   </div>
+
   <div class="print-button">
     <button onclick="window.print()">🖨 Εκτύπωση / Αποθήκευση σε PDF</button>
   </div>
 
   <script>
     const sheetURL = 'https://script.google.com/macros/s/AKfycbwXJriHgWntMQwvJIgibzKp-wMuQuO5YSucT_RvTYThuLpGrYRpkqD0U5jc5om0C4U1qw/exec';
-    const params = new URLSearchParams(window.location.search);
-    const memberId = params.get('id');
+    let membersData = [];
 
     fetch(sheetURL)
       .then(res => res.json())
       .then(data => {
-        const member = data.find(row => String(row['Member ID']) === String(memberId));
-        const card = document.getElementById('card');
-
-        if (member) {
-          const name = member['Name']?.trim() || 'Άγνωστο';
-          const status = member['Status']?.trim() || 'Άγνωστο';
-          const isActive = status.toLowerCase() === 'active';
-
-          let expiryFormatted = 'Δεν είναι διαθέσιμο';
-          if (member['Expiry Date']) {
-            const dateObj = new Date(member['Expiry Date']);
-            if (!isNaN(dateObj)) {
-              const day = String(dateObj.getDate()).padStart(2, '0');
-              const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-              const year = dateObj.getFullYear();
-              expiryFormatted = `${day}/${month}/${year}`;
-            } else {
-              expiryFormatted = member['Expiry Date'];
-            }
-          }
-
-          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://membership-viewer-git-main-spiridon-intzegiannis-projects.vercel.app/?id=${memberId}`;
-
-          card.innerHTML = `
-            <img src="logo.png" alt="Λογότυπο" class="logo">
-            <h2>Στοιχεία Μέλους</h2>
-            <p><strong>Αριθμός Μέλους:</strong> ${memberId}</p>
-            <p><strong>Όνομα:</strong> ${name}</p>
-            <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
-            <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
-            <div class="qr">
-              <img src="${qrUrl}" alt="QR Code">
-            </div>
-          `;
-        } else {
-          card.innerHTML = `<h2>Μέλος δεν βρέθηκε</h2><p>Δεν βρέθηκε μέλος με ID: ${memberId}</p>`;
-        }
-      })
-      .catch(err => {
-        document.getElementById('card').innerHTML = '<h2>Σφάλμα κατά τη φόρτωση των δεδομένων</h2>';
-        console.error('Fetch error:', err);
+        membersData = data;
       });
+
+    function searchMember() {
+      const input = document.getElementById('searchInput').value.toLowerCase().trim();
+      const card = document.getElementById('card');
+      const member = membersData.find(row =>
+        String(row['Member ID']).toLowerCase() === input ||
+        String(row['Name']).toLowerCase().includes(input)
+      );
+
+      if (member) {
+        const name = member['Name']?.trim() || 'Άγνωστο';
+        const status = member['Status']?.trim() || 'Άγνωστο';
+        const isActive = status.toLowerCase() === 'active';
+
+        let expiryFormatted = 'Δεν είναι διαθέσιμο';
+        if (member['Expiry Date']) {
+          const dateObj = new Date(member['Expiry Date']);
+          if (!isNaN(dateObj)) {
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const year = dateObj.getFullYear();
+            expiryFormatted = `${day}/${month}/${year}`;
+          } else {
+            expiryFormatted = member['Expiry Date'];
+          }
+        }
+
+        card.innerHTML = `
+          <img src="logo.png" alt="Λογότυπο" class="logo">
+          <h2>Στοιχεία Μέλους</h2>
+          <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
+          <p><strong>Όνομα:</strong> ${name}</p>
+          <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
+          <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
+        `;
+      } else {
+        card.innerHTML = `<h2>Μέλος δεν βρέθηκε</h2><p>Δεν βρέθηκε μέλος με τα στοιχεία: ${input}</p>`;
+      }
+    }
   </script>
 </body>
 </html>
