@@ -163,12 +163,13 @@
           <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
         `;
       } else if (results.length > 1) {
-        card.innerHTML = `<h2>Βρέθηκαν ${results.length} αποτελέσματα</h2>` + results.map(member => `
-          <div style="margin: 1rem 0; padding: 1rem; border: 1px solid white; border-radius: 1rem;">
-            <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
-            <p><strong>Όνομα:</strong> ${member['Name']}</p>
-          </div>
-        `).join('');
+        card.innerHTML = `<h2>Βρέθηκαν ${results.length} αποτελέσματα</h2>` + results.map((member, index) => `
+  <div style="margin: 1rem 0; padding: 1rem; border: 1px solid white; border-radius: 1rem;">
+    <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
+    <p><strong>Όνομα:</strong> ${member['Name']}</p>
+    <button onclick="showMemberDetails(${index})">Επιλογή</button>
+  </div>
+`).join('');
       } else {
             expiryFormatted = member['Expiry Date'];
           }
@@ -186,6 +187,39 @@
         card.innerHTML = `<h2>Μέλος δεν βρέθηκε</h2><p>Δεν βρέθηκε μέλος με τα στοιχεία: ${input}</p>`;
       }
     }
-  </script>
+  function showMemberDetails(index) {
+  const member = membersData.filter(row =>
+    String(row['Member ID']).toLowerCase() === document.getElementById('searchInput').value.toLowerCase().trim() ||
+    String(row['Name']).toLowerCase().includes(document.getElementById('searchInput').value.toLowerCase().trim())
+  )[index];
+
+  const card = document.getElementById('card');
+  const name = member['Name']?.trim() || 'Άγνωστο';
+  const status = member['Status']?.trim() || 'Άγνωστο';
+  const isActive = status.toLowerCase() === 'active';
+
+  let expiryFormatted = 'Δεν είναι διαθέσιμο';
+  if (member['Expiry Date']) {
+    const dateObj = new Date(member['Expiry Date']);
+    if (!isNaN(dateObj)) {
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const year = dateObj.getFullYear();
+      expiryFormatted = `${day}/${month}/${year}`;
+    } else {
+      expiryFormatted = member['Expiry Date'];
+    }
+  }
+
+  card.innerHTML = `
+    <img src="logo.png" alt="Λογότυπο" class="logo">
+    <h2>Στοιχεία Μέλους</h2>
+    <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
+    <p><strong>Όνομα:</strong> ${name}</p>
+    <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
+    <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
+  `;
+}
+</script>
 </body>
 </html>
