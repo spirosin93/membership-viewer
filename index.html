@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="el">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Membership Status Viewer</title>
+  <title>Έλεγχος Κατάστασης Μέλους</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -31,11 +31,11 @@
 </head>
 <body>
   <div class="card" id="card">
-    <h2>Loading membership data...</h2>
+    <h2>Φόρτωση δεδομένων μέλους...</h2>
   </div>
 
   <script>
-    const sheetURL = 'https://script.google.com/macros/s/AKfycbwIAKuLKqmrOEK-J1AR-mPYAd9oJbmYq4liHjUvxU1WhYlLCHV4DkAHORWc3K7rKLzP/exec';
+    const sheetURL = 'https://script.google.com/macros/s/AKfycbwXJriHgWntMQwvJIgibzKp-wMuQuO5YSucT_RvTYThuLpGrYRpkqD0U5jc5om0C4U1qw/exec';
 
     const params = new URLSearchParams(window.location.search);
     const memberId = params.get('id');
@@ -47,24 +47,24 @@
         const card = document.getElementById('card');
 
         if (member) {
-          const name = member['Name'] || 'Unknown';
-          const expiry = member['Expiry Date'] || 'N/A';
-          const status = member['Status'] || 'Unknown';
+          const name = member['Name'] || 'Άγνωστο';
+          const expiry = member['Expiry Date'] || 'Δεν είναι διαθέσιμο';
+          const status = member['Status'] || 'Άγνωστο';
           const isActive = status.toLowerCase() === 'active';
 
           card.innerHTML = `
-            <h2>Membership Info</h2>
-            <p><strong>ID:</strong> ${memberId}</p>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Expiry Date:</strong> ${expiry}</p>
-            <p><strong>Status:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${status}</span></p>
+            <h2>Πληροφορίες Μέλους</h2>
+            <p><strong>Αριθμός Μέλους:</strong> ${memberId}</p>
+            <p><strong>Όνομα:</strong> ${name}</p>
+            <p><strong>Ημερομηνία Λήξης:</strong> ${expiry}</p>
+            <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
           `;
         } else {
-          card.innerHTML = `<h2>Member not found</h2><p>No member with ID: ${memberId}</p>`;
+          card.innerHTML = `<h2>Μέλος δεν βρέθηκε</h2><p>Δεν βρέθηκε μέλος με ID: ${memberId}</p>`;
         }
       })
       .catch(err => {
-        document.getElementById('card').innerHTML = '<h2>Error loading data</h2>';
+        document.getElementById('card').innerHTML = '<h2>Σφάλμα κατά τη φόρτωση των δεδομένων</h2>';
         console.error('Fetch error:', err);
       });
   </script>
