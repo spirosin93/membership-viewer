@@ -120,6 +120,15 @@
     function searchMember() {
       const input = document.getElementById('searchInput').value.toLowerCase().trim();
       const card = document.getElementById('card');
+
+      if (!input) {
+        card.innerHTML = `
+          <img src="logo.png" alt="Λογότυπο" class="logo">
+          <h2>Πληκτρολογήστε όνομα ή ID για αναζήτηση...</h2>
+        `;
+        return;
+      }
+
       const results = membersData.filter(row =>
         String(row['Member ID']).toLowerCase() === input ||
         String(row['Name']).toLowerCase().includes(input)
