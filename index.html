@@ -220,10 +220,18 @@
   } else {
     initQR();
   }
+    document.body.appendChild(script);
+  } else {
+    initQR();
+  }
 
   function initQR() {
-    const qrScanner = new Html5Qrcode("qr-video");
-    qrScanner.start(
+  Html5Qrcode.getCameras().then(devices => {
+    if (devices && devices.length) {
+      const cameraId = devices[0].id;
+      const qrScanner = new Html5Qrcode("qr-video");
+      qrScanner.start(
+        cameraId,
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
       (decodedText) => {
