@@ -92,6 +92,7 @@
   <div style="margin-bottom: 1.5rem;">
     <button onclick="startQRScanner()" style="padding: 0.6rem 1.2rem; font-size: 1rem; border: none; border-radius: 0.5rem; background-color: #007A3D; color: white; cursor: pointer;">📷 Σάρωση QR</button>
     <div id="qr-reader" style="width: 300px; margin: 1rem auto;"></div>
+    <button id="close-qr" style="display:none; margin-top: 0.5rem; padding: 0.4rem 1rem; font-size: 0.9rem; border: none; border-radius: 0.5rem; background-color: #c0392b; color: white; cursor: pointer;" onclick="stopQRScanner()">✖ Κλείσιμο Κάμερας</button>
   </div>
   <div class="card" id="card">
     <img src="logo.png" alt="Λογότυπο" class="logo">
@@ -183,21 +184,26 @@
       showMemberDetails(results[index]);
     }
 
+    let qrScanner;
+
     function startQRScanner() {
       const qrContainer = document.getElementById('qr-reader');
+      const closeBtn = document.getElementById('close-qr');
       qrContainer.style.display = 'block';
+      closeBtn.style.display = 'inline-block';
 
       function initQR() {
         Html5Qrcode.getCameras().then(devices => {
           if (devices && devices.length) {
             const cameraId = devices[0].id;
-            const qrScanner = new Html5Qrcode("qr-reader");
+            qrScanner = new Html5Qrcode("qr-reader");
             qrScanner.start(
               cameraId,
               { fps: 10, qrbox: 250 },
               (decodedText) => {
                 qrScanner.stop().then(() => {
                   qrContainer.innerHTML = "";
+                  closeBtn.style.display = 'none';
                   const id = new URL(decodedText).searchParams.get('id');
                   const member = membersData.find(row => String(row['Member ID']) === id);
                   if (member) showMemberDetails(member);
@@ -221,6 +227,15 @@
         document.body.appendChild(script);
       } else {
         initQR();
+      }
+    }
+
+    function stopQRScanner() {
+      if (qrScanner) {
+        qrScanner.stop().then(() => {
+          document.getElementById('qr-reader').innerHTML = "";
+          document.getElementById('close-qr').style.display = 'none';
+        }).catch(err => console.error("Stop failed", err));
       }
     }
 
