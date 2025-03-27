@@ -23,9 +23,7 @@
       width: 100px;
       margin-bottom: 1rem;
     }
-    .card h2 {
-      color: #ffffff;
-    }
+    .card h2,
     .card p {
       color: #ffffff;
     }
@@ -60,168 +58,14 @@
       background-color: #1e1f30;
     }
     @media print {
-  body * {
-    visibility: hidden;
-  }
-  .card, .card * {
-    visibility: visible;
-  }
-  .card {
-    margin: 0;
-    box-shadow: none;
-    background: #007A3D !important;
-    color: #ffffff !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .print-button {
-    display: none;
-  }
-}
-  .card, .card * {
-    visibility: visible;
-  }
-  .card {
-    margin: 0;
-    box-shadow: none;
-    background: #007A3D !important;
-    color: #ffffff !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .print-button {
-    display: none;
-  }
-}
-  .card, .card * {
-    visibility: visible;
-  }
-  .card {
-    margin: 0;
-    box-shadow: none;
-    background: #007A3D !important;
-    color: #ffffff !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .print-button {
-    display: none;
-  }
-}
-  .card, .card * {
-    visibility: visible;
-  }
-  .card {
-    margin: 0;
-    box-shadow: none;
-    background: #007A3D !important;
-    color: #ffffff !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .print-button {
-    display: none;
-  }
-}
-  .card, .card * {
-    visibility: visible;
-  }
-  .card {
-    margin: 0;
-    box-shadow: none;
-    background: #007A3D !important;
-    color: #ffffff !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .print-button {
-    display: none;
-  }
-}
-  .card, .card * {
-    visibility: visible;
-  }
-  .card {
-    margin: 0;
-    box-shadow: none;
-    background: #007A3D !important;
-    color: #ffffff !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .print-button {
-    display: none;
-  }
-}
-  .card, .card * {
-    visibility: visible;
-  }
-  .card {
-    margin: 0;
-    box-shadow: none;
-    background: #007A3D !important;
-    color: #ffffff !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .print-button,
-  .card .status-line,
-  .card .expiry-line {
-    display: none !important;
-  }
-}
-  .card, .card * {
-    visibility: visible;
-  }
-  .card {
-    margin: 0;
-    box-shadow: none;
-    background: #007A3D !important;
-    color: #ffffff !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .card .status-line,
-  .card .expiry-line,
-  .print-button {
-    display: none !important;
-  }
-}
+      body * {
+        visibility: hidden;
+      }
       .card, .card * {
         visibility: visible;
       }
       .card {
-        margin: 0;
-        box-shadow: none;
-        background: #007A3D !important;
-        color: #ffffff !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      .print-button, .card .status-active, .card .status-expired, .card p:nth-of-type(3) {
-        display: none !important;
-      }
-    }
-      .card, .card * {
-        visibility: visible;
-      }
-      .card {
-        margin: 0;
-        box-shadow: none;
-        background: #007A3D !important;
-        color: #ffffff !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      .print-button, .card .status-active, .card .status-expired {
-        display: none !important;
-      }
-    }
-      .card, .card * {
-        visibility: visible;
-      }
-      .card {
-        margin: 0;
+        margin: 0 auto;
         box-shadow: none;
         background: #007A3D !important;
         color: #ffffff !important;
@@ -245,7 +89,6 @@
 
   <script>
     const sheetURL = 'https://script.google.com/macros/s/AKfycbwXJriHgWntMQwvJIgibzKp-wMuQuO5YSucT_RvTYThuLpGrYRpkqD0U5jc5om0C4U1qw/exec';
-
     const params = new URLSearchParams(window.location.search);
     const memberId = params.get('id');
 
@@ -256,7 +99,9 @@
         const card = document.getElementById('card');
 
         if (member) {
-          const name = member['Name'] !== undefined && member['Name'] !== '' ? member['Name'] : 'Άγνωστο';
+          const name = member['Name']?.trim() || 'Άγνωστο';
+          const status = member['Status']?.trim() || 'Άγνωστο';
+          const isActive = status.toLowerCase() === 'active';
 
           let expiryFormatted = 'Δεν είναι διαθέσιμο';
           if (member['Expiry Date']) {
@@ -271,9 +116,6 @@
             }
           }
 
-          const status = member['Status'] || 'Άγνωστο';
-          const isActive = status.toLowerCase() === 'active';
-
           const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://membership-viewer-git-main-spiridon-intzegiannis-projects.vercel.app/?id=${memberId}`;
 
           card.innerHTML = `
@@ -281,8 +123,8 @@
             <h2>Στοιχεία Μέλους</h2>
             <p><strong>Αριθμός Μέλους:</strong> ${memberId}</p>
             <p><strong>Όνομα:</strong> ${name}</p>
-            <p><strong>Ημερομηνία Λήξης:</strong> \${expiryFormatted}</p>
-            <p><strong>Κατάσταση:</strong> <span class="\${isActive ? 'status-active' : 'status-expired'}">\${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
+            <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
+            <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
             <div class="qr">
               <img src="${qrUrl}" alt="QR Code">
             </div>
