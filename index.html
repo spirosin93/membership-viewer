@@ -222,7 +222,10 @@
     });
   }
 };
-            const selectedCameraId = cameraSelect.value || devices[0].id;
+            let selectedCameraId;
+            const backCamera = devices.find(device => /back|rear|trailing/i.test(device.label));
+            selectedCameraId = backCamera ? backCamera.id : devices[0].id;
+            cameraSelect.value = selectedCameraId;
             qrScanner = new Html5Qrcode("qr-reader");
             qrScanner.start(
               selectedCameraId,
