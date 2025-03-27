@@ -74,6 +74,23 @@
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+  .print-button,
+  .card .status-line,
+  .card .expiry-line {
+    display: none !important;
+  }
+}
+  .card, .card * {
+    visibility: visible;
+  }
+  .card {
+    margin: 0;
+    box-shadow: none;
+    background: #007A3D !important;
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
   .card .status-line,
   .card .expiry-line,
   .print-button {
@@ -175,7 +192,7 @@
             <p><strong>Αριθμός Μέλους:</strong> ${memberId}</p>
             <p><strong>Όνομα:</strong> ${name}</p>
             <p class="expiry-line"><strong>Ημερομηνία Λήξης:</strong> \${expiryFormatted}</p>
-            <p class="status-line"><strong>Κατάσταση:</strong> <span class="\${isActive ? 'status-active' : 'status-expired'}">\${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
+            <p class="status-line" style="display: block;"><strong>Κατάσταση:</strong> <span class="\${isActive ? 'status-active' : 'status-expired'}">\${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
             <div class="qr">
               <img src="${qrUrl}" alt="QR Code">
             </div>
