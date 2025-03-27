@@ -27,15 +27,33 @@
       color: red;
       font-weight: bold;
     }
+    .print-button {
+      margin-top: 1rem;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .card, .card * {
+        visibility: visible;
+      }
+      .card {
+        margin: 0;
+        box-shadow: none;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="card" id="card">
     <h2>Φόρτωση δεδομένων μέλους...</h2>
   </div>
+  <div class="print-button">
+    <button onclick="window.print()">🖨 Εκτύπωση / Αποθήκευση σε PDF</button>
+  </div>
 
   <script>
-    const sheetURL = 'https://script.google.com/macros/s/AKfycbw0AmTyILHe5FmlMGWTQjse54TRHwlV9Q5eLSlxqhfLO5EcK5snxgGjUOpkgDy4TaN7ww/exec';
+    const sheetURL = 'https://script.google.com/macros/s/AKfycbwXJriHgWntMQwvJIgibzKp-wMuQuO5YSucT_RvTYThuLpGrYRpkqD0U5jc5om0C4U1qw/exec';
 
     const params = new URLSearchParams(window.location.search);
     const memberId = params.get('id');
@@ -43,14 +61,25 @@
     fetch(sheetURL)
       .then(res => res.json())
       .then(data => {
-        
         const member = data.find(row => String(row['Member ID']) === String(memberId));
-
         const card = document.getElementById('card');
 
         if (member) {
-          const name = member['Name'] || 'Άγνωστο';
-          const expiry = member['Expiry Date'] || 'Δεν είναι διαθέσιμο';
+          const name = member['Name'] !== undefined && member['Name'] !== '' ? member['Name'] : 'Άγνωστο';
+
+          let expiryFormatted = 'Δεν είναι διαθέσιμο';
+          if (member['Expiry Date']) {
+            const dateObj = new Date(member['Expiry Date']);
+            if (!isNaN(dateObj)) {
+              const day = String(dateObj.getDate()).padStart(2, '0');
+              const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+              const year = dateObj.getFullYear();
+              expiryFormatted = `${day}/${month}/${year}`;
+            } else {
+              expiryFormatted = member['Expiry Date'];
+            }
+          }
+
           const status = member['Status'] || 'Άγνωστο';
           const isActive = status.toLowerCase() === 'active';
 
@@ -58,7 +87,7 @@
             <h2>Πληροφορίες Μέλους</h2>
             <p><strong>Αριθμός Μέλους:</strong> ${memberId}</p>
             <p><strong>Όνομα:</strong> ${name}</p>
-            <p><strong>Ημερομηνία Λήξης:</strong> ${expiry}</p>
+            <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
             <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
           `;
         } else {
