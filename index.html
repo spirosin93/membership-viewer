@@ -35,26 +35,21 @@
   </div>
 
   <script>
-    const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRG3gkH7qb67N6G1K2LCMVuYzeIuW0RSXRDpyy2LKM36q6mEgIvZ3wcyz97j7bf75TSwwYhoq7hhvjM/gviz/tq?tqx=out:json';
+    const sheetURL = 'https://script.google.com/macros/s/AKfycbwIAKuLKqmrOEK-J1AR-mPYAd9oJbmYq4liHjUvxU1WhYlLCHV4DkAHORWc3K7rKLzP/exec';
 
     const params = new URLSearchParams(window.location.search);
     const memberId = params.get('id');
 
     fetch(sheetURL)
-      .then(res => res.text())
-      .then(text => {
-        const json = JSON.parse(text.substr(47).slice(0, -2));
-        const rows = json.table.rows;
-
-        const member = rows.find(row => row.c[0]?.v?.toString() === memberId);
-
+      .then(res => res.json())
+      .then(data => {
+        const member = data.find(row => row['Member ID'].toString() === memberId);
         const card = document.getElementById('card');
 
         if (member) {
-          const name = member.c[1]?.v || 'Unknown';
-          const expiry = member.c[2]?.v || 'N/A';
-          const status = member.c[3]?.v || 'Unknown';
-
+          const name = member['Name'] || 'Unknown';
+          const expiry = member['Expiry Date'] || 'N/A';
+          const status = member['Status'] || 'Unknown';
           const isActive = status.toLowerCase() === 'active';
 
           card.innerHTML = `
