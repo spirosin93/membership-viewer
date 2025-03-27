@@ -43,7 +43,9 @@
     fetch(sheetURL)
       .then(res => res.json())
       .then(data => {
-        const member = data.find(row => row['Member ID'].toString() === memberId);
+        
+        const member = data.find(row => String(row['Member ID']) === String(memberId));
+
         const card = document.getElementById('card');
 
         if (member) {
