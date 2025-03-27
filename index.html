@@ -21,16 +21,6 @@
       border-radius: 0.5rem;
       border: 1px solid #ccc;
     }
-    .search-container button {
-      padding: 0.6rem 1.2rem;
-      font-size: 1rem;
-      margin-left: 0.5rem;
-      border: none;
-      border-radius: 0.5rem;
-      background-color: #007A3D;
-      color: white;
-      cursor: pointer;
-    }
     .card {
       max-width: 420px;
       margin: 3rem auto;
@@ -98,11 +88,10 @@
 <body>
   <div class="search-container">
     <input type="text" id="searchInput" placeholder="Αναζήτηση με Όνομα ή ID" oninput="searchMember()">
-    
   </div>
   <div style="margin-bottom: 1.5rem;">
     <button onclick="startQRScanner()" style="padding: 0.6rem 1.2rem; font-size: 1rem; border: none; border-radius: 0.5rem; background-color: #007A3D; color: white; cursor: pointer;">📷 Σάρωση QR</button>
-    <video id="qr-video" style="width: 300px; margin-top: 1rem; display: none;"></video>
+    <div id="qr-reader" style="width: 300px; margin: 1rem auto;"></div>
   </div>
   <div class="card" id="card">
     <img src="logo.png" alt="Λογότυπο" class="logo">
@@ -112,21 +101,6 @@
     <button onclick="window.print()">🖨 Εκτύπωση / Αποθήκευση σε PDF</button>
   </div>
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const params = new URLSearchParams(window.location.search);
-      const memberId = params.get('id');
-
-      if (memberId) {
-        const interval = setInterval(() => {
-          if (membersData.length > 0) {
-            const member = membersData.find(row => String(row['Member ID']) === String(memberId));
-            if (member) showMemberDetails(member);
-            clearInterval(interval);
-          }
-        }, 100);
-      }
-    });
-
     const sheetURL = 'https://script.google.com/macros/s/AKfycbwXJriHgWntMQwvJIgibzKp-wMuQuO5YSucT_RvTYThuLpGrYRpkqD0U5jc5om0C4U1qw/exec';
     let membersData = [];
 
@@ -137,36 +111,36 @@
       });
 
     function searchMember() {
-  const input = document.getElementById('searchInput').value.toLowerCase().trim();
-  const card = document.getElementById('card');
+      const input = document.getElementById('searchInput').value.toLowerCase().trim();
+      const card = document.getElementById('card');
 
-  if (!input) {
-    card.innerHTML = `
-      <img src="logo.png" alt="Λογότυπο" class="logo">
-      <h2>Πληκτρολογήστε όνομα ή ID για αναζήτηση...</h2>
-    `;
-    return;
-  }
+      if (!input) {
+        card.innerHTML = `
+          <img src="logo.png" alt="Λογότυπο" class="logo">
+          <h2>Πληκτρολογήστε όνομα ή ID για αναζήτηση...</h2>
+        `;
+        return;
+      }
 
-  const results = membersData.filter(row =>
-    String(row['Member ID']).toLowerCase() === input ||
-    String(row['Name']).toLowerCase().includes(input)
-  );
+      const results = membersData.filter(row =>
+        String(row['Member ID']).toLowerCase() === input ||
+        String(row['Name']).toLowerCase().includes(input)
+      );
 
-  if (results.length === 1) {
-    showMemberDetails(results[0]);
-  } else if (results.length > 1) {
-    card.innerHTML = `<h2>Βρέθηκαν ${results.length} αποτελέσματα</h2>` + results.map((member, index) => `
-      <div style="margin: 1rem 0; padding: 1rem; border: 1px solid white; border-radius: 1rem;">
-        <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
-        <p><strong>Όνομα:</strong> ${member['Name']}</p>
-        <button onclick="showMemberDetailsByIndex(${index})">Επιλογή</button>
-      </div>
-    `).join('');
-  } else {
-    card.innerHTML = `<h2>Μέλος δεν βρέθηκε</h2><p>Δεν βρέθηκε μέλος με τα στοιχεία: ${input}</p>`;
-  }
-}
+      if (results.length === 1) {
+        showMemberDetails(results[0]);
+      } else if (results.length > 1) {
+        card.innerHTML = `<h2>Βρέθηκαν ${results.length} αποτελέσματα</h2>` + results.map((member, index) => `
+          <div style="margin: 1rem 0; padding: 1rem; border: 1px solid white; border-radius: 1rem;">
+            <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
+            <p><strong>Όνομα:</strong> ${member['Name']}</p>
+            <button onclick="showMemberDetailsByIndex(${index})">Επιλογή</button>
+          </div>
+        `).join('');
+      } else {
+        card.innerHTML = `<h2>Μέλος δεν βρέθηκε</h2><p>Δεν βρέθηκε μέλος με τα στοιχεία: ${input}</p>`;
+      }
+    }
 
     function showMemberDetails(member) {
       const card = document.getElementById('card');
@@ -208,45 +182,67 @@
       );
       showMemberDetails(results[index]);
     }
-  function startQRScanner() {
-  const video = document.getElementById('qr-video');
-  video.style.display = 'block';
 
-  if (!window.html5QrCode) {
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/html5-qrcode';
-    script.onload = () => initQR();
-    document.body.appendChild(script);
-  } else {
-    initQR();
-  }
-    document.body.appendChild(script);
-  } else {
-    initQR();
-  }
+    function startQRScanner() {
+      const qrContainer = document.getElementById('qr-reader');
+      qrContainer.style.display = 'block';
 
-  function initQR() {
-  Html5Qrcode.getCameras().then(devices => {
-    if (devices && devices.length) {
-      const cameraId = devices[0].id;
-      const qrScanner = new Html5Qrcode("qr-video");
-      qrScanner.start(
-        cameraId,
-      { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
-      (decodedText) => {
-        qrScanner.stop();
-        video.style.display = 'none';
-        const id = new URL(decodedText).searchParams.get('id');
-        const member = membersData.find(row => String(row['Member ID']) === id);
-        if (member) showMemberDetails(member);
-      },
-      (errorMessage) => {}
-    ).catch(err => {
-      console.error("QR scanner error", err);
+      function initQR() {
+        Html5Qrcode.getCameras().then(devices => {
+          if (devices && devices.length) {
+            const cameraId = devices[0].id;
+            const qrScanner = new Html5Qrcode("qr-reader");
+            qrScanner.start(
+              cameraId,
+              { fps: 10, qrbox: 250 },
+              (decodedText) => {
+                qrScanner.stop().then(() => {
+                  qrContainer.innerHTML = "";
+                  const id = new URL(decodedText).searchParams.get('id');
+                  const member = membersData.find(row => String(row['Member ID']) === id);
+                  if (member) showMemberDetails(member);
+                });
+              },
+              (errorMessage) => {}
+            ).catch(err => {
+              console.error("QR scanner error", err);
+            });
+          }
+        });
+      }
+
+      if (!window.html5QrCodeLoaded) {
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/html5-qrcode';
+        script.onload = () => {
+          window.html5QrCodeLoaded = true;
+          initQR();
+        };
+        document.body.appendChild(script);
+      } else {
+        initQR();
+      }
+    }
+
+    function checkForQRUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const memberId = urlParams.get('id');
+      if (!memberId) return;
+      const member = membersData.find(row => String(row['Member ID']) === memberId);
+      if (member) showMemberDetails(member);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (membersData.length > 0) checkForQRUrl();
+      else {
+        const interval = setInterval(() => {
+          if (membersData.length > 0) {
+            clearInterval(interval);
+            checkForQRUrl();
+          }
+        }, 200);
+      }
     });
-  }
-}
-</script>
+  </script>
 </body>
 </html>
