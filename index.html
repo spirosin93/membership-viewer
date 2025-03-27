@@ -199,12 +199,29 @@
             const cameraSelect = document.getElementById('camera-select');
             cameraSelect.innerHTML = devices.map(device => `<option value="${device.id}">${device.label}</option>`).join('');
             cameraSelect.onchange = () => {
-              if (qrScanner) {
-                qrScanner.stop().then(() => {
-                  startQRScanner();
-                });
-              }
-            };
+  const newCameraId = cameraSelect.value;
+  if (qrScanner) {
+    qrScanner.stop().then(() => {
+      qrScanner.clear();
+      qrScanner.start(
+        newCameraId,
+        { fps: 10, qrbox: 250 },
+        (decodedText) => {
+          qrScanner.stop().then(() => {
+            document.getElementById('qr-reader').innerHTML = "";
+            document.getElementById('close-qr').style.display = 'none';
+            const id = new URL(decodedText).searchParams.get('id');
+            const member = membersData.find(row => String(row['Member ID']) === id);
+            if (member) showMemberDetails(member);
+          });
+        },
+        (errorMessage) => {}
+      ).catch(err => {
+        console.error("QR scanner error", err);
+      });
+    });
+  }
+};
             const selectedCameraId = cameraSelect.value || devices[0].id;
             qrScanner = new Html5Qrcode("qr-reader");
             qrScanner.start(
