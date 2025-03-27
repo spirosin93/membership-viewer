@@ -130,12 +130,13 @@
     function searchMember() {
       const input = document.getElementById('searchInput').value.toLowerCase().trim();
       const card = document.getElementById('card');
-      const member = membersData.find(row =>
+      const results = membersData.filter(row =>
         String(row['Member ID']).toLowerCase() === input ||
         String(row['Name']).toLowerCase().includes(input)
       );
 
-      if (member) {
+      if (results.length === 1) {
+        const member = results[0];
         const name = member['Name']?.trim() || 'Άγνωστο';
         const status = member['Status']?.trim() || 'Άγνωστο';
         const isActive = status.toLowerCase() === 'active';
@@ -149,6 +150,26 @@
             const year = dateObj.getFullYear();
             expiryFormatted = `${day}/${month}/${year}`;
           } else {
+            expiryFormatted = member['Expiry Date'];
+          }
+        }
+
+        card.innerHTML = `
+          <img src="logo.png" alt="Λογότυπο" class="logo">
+          <h2>Στοιχεία Μέλους</h2>
+          <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
+          <p><strong>Όνομα:</strong> ${name}</p>
+          <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
+          <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
+        `;
+      } else if (results.length > 1) {
+        card.innerHTML = `<h2>Βρέθηκαν ${results.length} αποτελέσματα</h2>` + results.map(member => `
+          <div style="margin: 1rem 0; padding: 1rem; border: 1px solid white; border-radius: 1rem;">
+            <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
+            <p><strong>Όνομα:</strong> ${member['Name']}</p>
+          </div>
+        `).join('');
+      } else {
             expiryFormatted = member['Expiry Date'];
           }
         }
