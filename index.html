@@ -63,8 +63,26 @@
     @media print {
       .card p:nth-of-type(3),
       .card p:nth-of-type(4) {
-        display: none !important;
+        display: block !important;
       }
+      body * {
+        visibility: hidden;
+      }
+      .card, .card * {
+        visibility: visible;
+      }
+      .card {
+        margin: 0 auto;
+        box-shadow: none;
+        background: #007A3D !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .print-button {
+        display: none;
+      }
+    }
       body * {
         visibility: hidden;
       }
@@ -100,7 +118,7 @@
     <h2>Πληκτρολογήστε όνομα ή ID για αναζήτηση...</h2>
   </div>
   <div class="print-button">
-    <button onclick="window.print()">🖨 Εκτύπωση / Αποθήκευση σε PDF</button>
+    <button onclick="shareMemberCard()">📤 Κοινοποίηση</button>
   </div>
   <script>
     const sheetURL = 'https://script.google.com/macros/s/AKfycbwXJriHgWntMQwvJIgibzKp-wMuQuO5YSucT_RvTYThuLpGrYRpkqD0U5jc5om0C4U1qw/exec';
@@ -165,7 +183,7 @@
 
       card.innerHTML = `
         <img src="logo.png" alt="Λογότυπο" class="logo">
-        <h2>ΓΥΘΕΙΟ 13<br>Στοιχεία Μέλους</h2>
+        <h2>Στοιχεία Μέλους</h2>
         <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
         <p><strong>Όνομα:</strong> ${name}</p>
         <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
@@ -288,6 +306,20 @@
         }, 200);
       }
     });
-  </script>
+  function shareMemberCard() {
+  const url = window.location.href;
+  if (navigator.share) {
+    navigator.share({
+      title: document.title,
+      text: 'Δες την κάρτα μέλους μου',
+      url
+    }).catch(err => console.error('Share failed:', err));
+  } else {
+    navigator.clipboard.writeText(url).then(() => {
+      alert('Ο σύνδεσμος αντιγράφηκε στο πρόχειρο!');
+    });
+  }
+}
+</script>
 </body>
 </html>
