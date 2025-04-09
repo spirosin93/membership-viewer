@@ -238,16 +238,15 @@ function showMemberDetails(member) {
   }
 
   card.innerHTML = `
-    <img src="logo.png" alt="Λογότυπο" class="logo">
+    <div class="card-content">
+      <img src="logo.png" alt="Λογότυπο" class="logo">
     <h2>ΓΥΘΕΙΟ 13<br>Στοιχεία Μέλους</h2>
     <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
     <p><strong>Όνομα:</strong> ${name}</p>
     <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
     <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
-    <div class="qr">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://membership-viewer.vercel.app/?id=${member['Member ID']}" alt="QR Code">
+    $1
     </div>
-        </div>
   `;
 }
 
