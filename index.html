@@ -63,9 +63,8 @@
     @media print {
       .card p:nth-of-type(3),
       .card p:nth-of-type(4) {
-        display: block !important;
+        display: none !important;
       }
-      
       body * {
         visibility: hidden;
       }
@@ -101,58 +100,194 @@
     <h2>Πληκτρολογήστε όνομα ή ID για αναζήτηση...</h2>
   </div>
   <div class="print-button">
-    <button onclick="shareMemberCard()">📤 Κοινοποίηση</button>
-    <button onclick="downloadMemberCardPdf()">💾 Λήψη PDF</button>
+    <button onclick="window.print()">🖨 Εκτύπωση / Αποθήκευση σε PDF</button>
   </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script>
-function downloadMemberCardPdf() {
-  const card = document.getElementById('card');
-  const opt = {
-    margin: 0.2,
-    filename: 'member-card.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-  };
-  html2pdf().set(opt).from(card).save();
-}
+  <script>
+    const sheetURL = 'https://script.google.com/macros/s/AKfycbwXJriHgWntMQwvJIgibzKp-wMuQuO5YSucT_RvTYThuLpGrYRpkqD0U5jc5om0C4U1qw/exec';
+    let membersData = [];
 
-async function shareMemberCard() {
-  const card = document.getElementById('card');
-  const opt = {
-    margin: 0.2,
-    filename: 'member-card.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-  };
-
-  const pdfBlob = await html2pdf().from(card).set(opt).outputPdf('blob');
-  const file = new File([pdfBlob], 'member-card.pdf', { type: 'application/pdf' });
-
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({
-        files: [file],
-        title: 'Κάρτα Μέλους',
-        text: 'Η κάρτα μέλους μου σε PDF'
+    fetch(sheetURL)
+      .then(res => res.json())
+      .then(data => {
+        membersData = data;
       });
-    } catch (err) {
-      console.error('Share failed:', err);
-    }
-  } else {
-    const url = window.URL.createObjectURL(pdfBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'member-card.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    alert('Το PDF δημιουργήθηκε και αποθηκεύτηκε!');
-  }
-}
 
-$1</script>
+    function searchMember() {
+      const input = document.getElementById('searchInput').value.toLowerCase().trim();
+      const card = document.getElementById('card');
+
+      if (!input) {
+        card.innerHTML = `
+          <img src="logo.png" alt="Λογότυπο" class="logo">
+          <h2>Πληκτρολογήστε όνομα ή ID για αναζήτηση...</h2>
+        `;
+        return;
+      }
+
+      const results = membersData.filter(row =>
+        String(row['Member ID']).toLowerCase() === input ||
+        String(row['Name']).toLowerCase().includes(input)
+      );
+
+      if (results.length === 1) {
+        showMemberDetails(results[0]);
+      } else if (results.length > 1) {
+        card.innerHTML = `<h2>Βρέθηκαν ${results.length} αποτελέσματα</h2>` + results.map((member, index) => `
+          <div style="margin: 1rem 0; padding: 1rem; border: 1px solid white; border-radius: 1rem;">
+            <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
+            <p><strong>Όνομα:</strong> ${member['Name']}</p>
+            <button onclick="showMemberDetailsByIndex(${index})">Επιλογή</button>
+          </div>
+        `).join('');
+      } else {
+        card.innerHTML = `<h2>Μέλος δεν βρέθηκε</h2><p>Δεν βρέθηκε μέλος με τα στοιχεία: ${input}</p>`;
+      }
+    }
+
+    function showMemberDetails(member) {
+      const card = document.getElementById('card');
+      const name = member['Name']?.trim() || 'Άγνωστο';
+      const status = member['Status']?.trim() || 'Άγνωστο';
+      const isActive = status.toLowerCase() === 'active';
+
+      let expiryFormatted = 'Δεν είναι διαθέσιμο';
+      if (member['Expiry Date']) {
+        const dateObj = new Date(member['Expiry Date']);
+        if (!isNaN(dateObj)) {
+          const day = String(dateObj.getDate()).padStart(2, '0');
+          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const year = dateObj.getFullYear();
+          expiryFormatted = `${day}/${month}/${year}`;
+        } else {
+          expiryFormatted = member['Expiry Date'];
+        }
+      }
+
+      card.innerHTML = `
+        <img src="logo.png" alt="Λογότυπο" class="logo">
+        <h2>ΓΥΘΕΙΟ 13<br>Στοιχεία Μέλους</h2>
+        <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
+        <p><strong>Όνομα:</strong> ${name}</p>
+        <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
+        <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
+        <div class="qr">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://membership-viewer.vercel.app/?id=${member['Member ID']}" alt="QR Code">
+        </div>
+      `;
+    }
+
+    function showMemberDetailsByIndex(index) {
+      const input = document.getElementById('searchInput').value.toLowerCase().trim();
+      const results = membersData.filter(row =>
+        String(row['Member ID']).toLowerCase() === input ||
+        String(row['Name']).toLowerCase().includes(input)
+      );
+      showMemberDetails(results[index]);
+    }
+
+    let qrScanner;
+
+    function startQRScanner() {
+      const qrContainer = document.getElementById('qr-reader');
+      const closeBtn = document.getElementById('close-qr');
+      qrContainer.style.display = 'block';
+      closeBtn.style.display = 'inline-block';
+
+      function initQR() {
+        Html5Qrcode.getCameras().then(devices => {
+          if (devices && devices.length) {
+            const cameraSelect = document.getElementById('camera-select');
+            cameraSelect.innerHTML = devices.map(device => `<option value="${device.id}">${device.label}</option>`).join('');
+            cameraSelect.onchange = () => {
+  const newCameraId = cameraSelect.value;
+  if (qrScanner) {
+    qrScanner.stop().then(() => {
+      qrScanner.clear();
+      qrScanner.start(
+        newCameraId,
+        { fps: 10, qrbox: 250 },
+        (decodedText) => {
+          qrScanner.stop().then(() => {
+            document.getElementById('qr-reader').innerHTML = "";
+            document.getElementById('close-qr').style.display = 'none';
+            const id = new URL(decodedText).searchParams.get('id');
+            const member = membersData.find(row => String(row['Member ID']) === id);
+            if (member) showMemberDetails(member);
+          });
+        },
+        (errorMessage) => {}
+      ).catch(err => {
+        console.error("QR scanner error", err);
+      });
+    });
+  }
+};
+            let selectedCameraId;
+            const backCamera = devices.find(device => /back|rear|trailing/i.test(device.label));
+            selectedCameraId = backCamera ? backCamera.id : devices[0].id;
+            cameraSelect.value = selectedCameraId;
+            qrScanner = new Html5Qrcode("qr-reader");
+            qrScanner.start(
+              selectedCameraId,
+              { fps: 10, qrbox: 250 },
+              (decodedText) => {
+                qrScanner.stop().then(() => {
+                  qrContainer.innerHTML = "";
+                  closeBtn.style.display = 'none';
+                  const id = new URL(decodedText).searchParams.get('id');
+                  const member = membersData.find(row => String(row['Member ID']) === id);
+                  if (member) showMemberDetails(member);
+                });
+              },
+              (errorMessage) => {}
+            ).catch(err => {
+              console.error("QR scanner error", err);
+            });
+          }
+        });
+      }
+
+      if (!window.html5QrCodeLoaded) {
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/html5-qrcode';
+        script.onload = () => {
+          window.html5QrCodeLoaded = true;
+          initQR();
+        };
+        document.body.appendChild(script);
+      } else {
+        initQR();
+      }
+    }
+
+    function stopQRScanner() {
+      if (qrScanner) {
+        qrScanner.stop().then(() => {
+          document.getElementById('qr-reader').innerHTML = "";
+          document.getElementById('close-qr').style.display = 'none';
+        }).catch(err => console.error("Stop failed", err));
+      }
+    }
+
+    function checkForQRUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const memberId = urlParams.get('id');
+      if (!memberId) return;
+      const member = membersData.find(row => String(row['Member ID']) === memberId);
+      if (member) showMemberDetails(member);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (membersData.length > 0) checkForQRUrl();
+      else {
+        const interval = setInterval(() => {
+          if (membersData.length > 0) {
+            clearInterval(interval);
+            checkForQRUrl();
+          }
+        }, 200);
+      }
+    });
+  </script>
 </body>
 </html>
