@@ -191,65 +191,16 @@ function searchMember() {
 
   if (!input) {
     card.innerHTML = `
-    <div class="card-content">
       <img src="logo.png" alt="Λογότυπο" class="logo">
-    <h2>Πληκτρολογήστε όνομα ή ID για αναζήτηση...</h2>
-  `;
-  return;
-  }
-
-  const results = membersData.filter(row =>
-    String(row['Member ID']).toLowerCase() === input ||
-    String(row['Name']).toLowerCase().includes(input)
-  );
-
-  if (results.length === 1) {
-    showMemberDetails(results[0]);
-  } else if (results.length > 1) {
-    card.innerHTML = `<h2>Βρέθηκαν ${results.length} αποτελέσματα</h2>` + results.map((member, index) => `
-      <div style="margin: 1rem 0; padding: 1rem; border: 1px solid white; border-radius: 1rem;">
-        <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
-        <p><strong>Όνομα:</strong> ${member['Name']}</p>
-        <button onclick="showMemberDetailsByIndex(${index})">Επιλογή</button>
+      <h2>ΓΥΘΕΙΟ 13<br>Στοιχεία Μέλους</h2>
+      <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
+      <p><strong>Όνομα:</strong> ${name}</p>
+      <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
+      <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
+      <div class="qr">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://membership-viewer.vercel.app/?id=${member['Member ID']}" alt="QR Code">
       </div>
-    `).join('');
-  } else {
-    card.innerHTML = `<h2>Μέλος δεν βρέθηκε</h2><p>Δεν βρέθηκε μέλος με τα στοιχεία: ${input}</p>`;
-  }
-}
-
-function showMemberDetails(member) {
-  const card = document.getElementById('card');
-  const name = member['Name']?.trim() || 'Άγνωστο';
-  const status = member['Status']?.trim() || 'Άγνωστο';
-  const isActive = status.toLowerCase() === 'active';
-
-  let expiryFormatted = 'Δεν είναι διαθέσιμο';
-  if (member['Expiry Date']) {
-    const dateObj = new Date(member['Expiry Date']);
-    if (!isNaN(dateObj)) {
-      const day = String(dateObj.getDate()).padStart(2, '0');
-      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const year = dateObj.getFullYear();
-      expiryFormatted = `${day}/${month}/${year}`;
-    } else {
-      expiryFormatted = member['Expiry Date'];
-    }
-  }
-
-  card.innerHTML = `
-    <div class="card-content">
-      <img src="logo.png" alt="Λογότυπο" class="logo">
-    <h2>ΓΥΘΕΙΟ 13<br>Στοιχεία Μέλους</h2>
-    <p><strong>Αριθμός Μέλους:</strong> ${member['Member ID']}</p>
-    <p><strong>Όνομα:</strong> ${name}</p>
-    <p><strong>Ημερομηνία Λήξης:</strong> ${expiryFormatted}</p>
-    <p><strong>Κατάσταση:</strong> <span class="${isActive ? 'status-active' : 'status-expired'}">${isActive ? 'Ενεργό' : 'Ληγμένο'}</span></p>
-    <div class="qr">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://membership-viewer.vercel.app/?id=${member['Member ID']}" alt="QR Code">
-    </div>
-    </div>
-  `;
+    `;
 }
 
 function showMemberDetailsByIndex(index) {
