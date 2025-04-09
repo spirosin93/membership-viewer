@@ -193,9 +193,9 @@ function searchMember() {
     card.innerHTML = `
     <div class="card-content">
       <img src="logo.png" alt="Λογότυπο" class="logo">
-      <h2>Πληκτρολογήστε όνομα ή ID για αναζήτηση...</h2>
-    `;
-    return;
+    <h2>Πληκτρολογήστε όνομα ή ID για αναζήτηση...</h2>
+  `;
+  return;
   }
 
   const results = membersData.filter(row =>
@@ -247,7 +247,7 @@ function showMemberDetails(member) {
     <div class="qr">
       <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://membership-viewer.vercel.app/?id=${member['Member ID']}" alt="QR Code">
     </div>
-    </div>
+        </div>
   `;
 }
 
