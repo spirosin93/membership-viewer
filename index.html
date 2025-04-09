@@ -103,7 +103,8 @@
   <div class="print-button">
     <button onclick="shareMemberCard()">📤 Κοινοποίηση</button>
   </div>
-  <script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
     const sheetURL = 'https://script.google.com/macros/s/AKfycbwXJriHgWntMQwvJIgibzKp-wMuQuO5YSucT_RvTYThuLpGrYRpkqD0U5jc5om0C4U1qw/exec';
     let membersData = [];
 
@@ -289,14 +290,38 @@
         }, 200);
       }
     });
-  function shareMemberCard() {
-  const url = window.location.href;
-  if (navigator.share) {
-    navigator.share({
-      title: document.title,
-      text: 'Δες την κάρτα μέλους μου',
-      url
-    }).catch(err => console.error('Share failed:', err));
+  async function shareMemberCard() {
+  const card = document.getElementById('card');
+  const opt = {
+    margin: 0.2,
+    filename: 'member-card.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+
+  const pdfBlob = await html2pdf().from(card).set(opt).outputPdf('blob');
+  const file = new File([pdfBlob], 'member-card.pdf', { type: 'application/pdf' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: 'Κάρτα Μέλους',
+        text: 'Η κάρτα μέλους μου σε PDF'
+      });
+    } catch (err) {
+      console.error('Share failed:', err);
+    }
+  } else {
+    const url = window.URL.createObjectURL(pdfBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'member-card.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    alert('Το PDF δημιουργήθηκε και αποθηκεύτηκε!');).catch(err => console.error('Share failed:', err));
   } else {
     navigator.clipboard.writeText(url).then(() => {
       alert('Ο σύνδεσμος αντιγράφηκε στο πρόχειρο!');
