@@ -80,6 +80,7 @@
       }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
   <div class="search-container">
@@ -97,7 +98,9 @@
   </div>
   <div class="print-button">
     <button onclick="window.print()">🖨 Εκτύπωση / Αποθήκευση σε PDF</button>
+    <button onclick="shareCardImage()">📤 Κοινοποίηση / Αποστολή Κάρτας</button>
   </div>
+  
   <script>
     const sheetURL = 'https://script.google.com/macros/s/AKfycbwXJriHgWntMQwvJIgibzKp-wMuQuO5YSucT_RvTYThuLpGrYRpkqD0U5jc5om0C4U1qw/exec';
     let membersData = [];
@@ -280,6 +283,38 @@
         }, 200);
       }
     });
+
+    async function shareCardImage() {
+    const card = document.getElementById('card');
+    const canvas = await html2canvas(card, {
+      backgroundColor: '#007A3D',
+      useCORS: true,
+      scale: 2
+    });
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        alert("Προέκυψε σφάλμα κατά τη δημιουργία της εικόνας.");
+        return;
+      }
+
+      const file = new File([blob], "member-card.png", { type: "image/png" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: 'Κάρτα Μέλους',
+            text: 'Δες την κάρτα μέλους:',
+            files: [file]
+          });
+        } catch (error) {
+          console.error("Share ακυρώθηκε ή απέτυχε:", error);
+        }
+      } else {
+        alert("Η συσκευή ή ο browser σου δεν υποστηρίζει κοινοποίηση αρχείων.");
+      }
+    });
+  }
   </script>
 </body>
 </html>
