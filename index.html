@@ -102,8 +102,20 @@
   </div>
   <div class="print-button">
     <button onclick="shareMemberCard()">📤 Κοινοποίηση</button>
+    <button onclick="downloadMemberCardPdf()">💾 Λήψη PDF</button>
   </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">function downloadMemberCardPdf() {
+  const card = document.getElementById('card');
+  const opt = {
+    margin: 0.2,
+    filename: 'member-card.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(card).save();
+}
+</script>
 <script>
     const sheetURL = 'https://script.google.com/macros/s/AKfycbwXJriHgWntMQwvJIgibzKp-wMuQuO5YSucT_RvTYThuLpGrYRpkqD0U5jc5om0C4U1qw/exec';
     let membersData = [];
@@ -321,7 +333,9 @@
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    alert('Το PDF δημιουργήθηκε και αποθηκεύτηκε!');).catch(err => console.error('Share failed:', err));
+    alert('Το PDF δημιουργήθηκε και αποθηκεύτηκε!');
+  }
+}).catch(err => console.error('Share failed:', err));
   } else {
     navigator.clipboard.writeText(url).then(() => {
       alert('Ο σύνδεσμος αντιγράφηκε στο πρόχειρο!');
